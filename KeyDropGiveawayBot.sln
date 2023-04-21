@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{15E00C2E-3D4C-44B8-8543-FDCC00F569E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyDropGiveawayBot", "src\KeyDropGiveawayBot\KeyDropGiveawayBot.csproj", "{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F} = {15E00C2E-3D4C-44B8-8543-FDCC00F569E6}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A81E6B6A-97A8-4DB1-82FA-D5E3038E114F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
