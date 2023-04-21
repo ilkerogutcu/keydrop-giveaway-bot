@@ -109,7 +109,7 @@ public class ApiClient : IApiClient
     private HttpClient GetHttpClient()
     {
         var httpClient = _httpClientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromSeconds(_configuration.GetValue<int>("Timeout"));
+        httpClient.Timeout = TimeSpan.FromSeconds(_configuration.GetValue<int>("requestTimeout"));
         return httpClient;
     }
 
