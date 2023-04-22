@@ -30,7 +30,8 @@ public class ApiClient : IApiClient
         return this;
     }
 
-    public async Task<T> GetAsync<T>(string url, IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null)
+    public async Task<T> GetAsync<T>(string url, IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default)
         where T : class
     {
         var uri = GetUri(url, GetQueryString(queryParameters));
@@ -38,7 +39,7 @@ public class ApiClient : IApiClient
         httpClient.BaseAddress = new Uri(uri);
         AddHeaders(httpClient);
 
-        var httpClientResponse = await httpClient.GetAsync(uri);
+        var httpClientResponse = await httpClient.GetAsync(uri, cancellationToken);
 
         if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
             throw new ExpiredCookieException();
@@ -47,20 +48,21 @@ public class ApiClient : IApiClient
             throw new Exception(
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
 
-        var response = await GetResponseAsync<T>(httpClientResponse);
+        var response = await GetResponseAsync<T>(httpClientResponse, cancellationToken);
         return response;
     }
 
     public async Task<string> GetResponseContentAsStringAsync(string url,
-        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null)
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default)
     {
         var uri = GetUri(url, GetQueryString(queryParameters));
         var httpClient = GetHttpClient();
         httpClient.BaseAddress = new Uri(uri);
         AddHeaders(httpClient);
 
-        var httpClientResponse = await httpClient.GetAsync(uri);
-        var response = await httpClientResponse.Content.ReadAsStringAsync();
+        var httpClientResponse = await httpClient.GetAsync(uri, cancellationToken);
+        var response = await httpClientResponse.Content.ReadAsStringAsync(cancellationToken);
 
         if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
             throw new ExpiredCookieException();
@@ -73,7 +75,8 @@ public class ApiClient : IApiClient
     }
 
     public async Task<TOut> PostAsync<TIn, TOut>(string url, TIn payload,
-        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null) where TIn : class where TOut : class
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default) where TIn : class where TOut : class
     {
         var uri = GetUri(url, GetQueryString(queryParameters));
         var httpClient = GetHttpClient();
@@ -81,7 +84,7 @@ public class ApiClient : IApiClient
         AddHeaders(httpClient);
 
         var httpClientResponse =
-            await httpClient.PostAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)));
+            await httpClient.PostAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)), cancellationToken);
 
         if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
             throw new ExpiredCookieException();
@@ -90,12 +93,13 @@ public class ApiClient : IApiClient
             throw new Exception(
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
 
-        var response = await GetResponseAsync<TOut>(httpClientResponse);
+        var response = await GetResponseAsync<TOut>(httpClientResponse, cancellationToken);
         return response;
     }
 
     public async Task<TOut> PutAsync<TIn, TOut>(string url, TIn? payload,
-        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null) where TIn : class where TOut : class
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default) where TIn : class where TOut : class
     {
         var uri = GetUri(url, GetQueryString(queryParameters));
         var httpClient = GetHttpClient();
@@ -106,12 +110,12 @@ public class ApiClient : IApiClient
 
         if (payload is null)
         {
-            httpClientResponse = await httpClient.PutAsync(uri, null);
+            httpClientResponse = await httpClient.PutAsync(uri, null, cancellationToken);
         }
         else
         {
-            httpClientResponse =
-                await httpClient.PutAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)));
+            httpClientResponse = await httpClient.PutAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)),
+                cancellationToken);
         }
 
         if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
@@ -121,13 +125,14 @@ public class ApiClient : IApiClient
             throw new Exception(
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
 
-        var response = await GetResponseAsync<TOut>(httpClientResponse);
+        var response = await GetResponseAsync<TOut>(httpClientResponse, cancellationToken);
         return response;
     }
 
-    private static async Task<TOut> GetResponseAsync<TOut>(HttpResponseMessage httpClientResponse) where TOut : class
+    private static async Task<TOut> GetResponseAsync<TOut>(HttpResponseMessage httpClientResponse,
+        CancellationToken cancellationToken = default) where TOut : class
     {
-        var content = await httpClientResponse.Content.ReadAsStringAsync();
+        var content = await httpClientResponse.Content.ReadAsStringAsync(cancellationToken);
         var response = JsonConvert.DeserializeObject<TOut>(content);
         if (response == null)
             throw new Exception($"An error occurred while deserializing {content}");

@@ -61,7 +61,7 @@ while (true)
     var giveaways = await keyDropService.GetGiveawaysAsync();
     if (giveaways == null)
     {
-        Log.Warning("Trying to get giveaways again in 10 seconds.");
+        Log.Warning("Trying to get giveaways again in 10 seconds");
         Thread.Sleep(10000);
         continue;
     }
@@ -71,13 +71,13 @@ while (true)
         var giveawayDetails = await keyDropService.GetGiveawayDetailsByIdAsync(giveaway.Id);
         if (giveawayDetails is null)
         {
-            Log.Warning("An error occurred while getting giveaway details.");
+            Log.Warning("An error occurred while getting giveaway details");
             return;
         }
 
         if (giveawayDetails.HaveIJoined == true)
         {
-            Log.Information($"Already joined giveaway {giveawayDetails.Id}. Currently in {giveawayDetails.ParticipantCount} users.");
+            Log.Information("Already joined giveaway {GiveawayDetailsId}. Currently in {GiveawayDetailsParticipantCount} users", giveawayDetails.Id, giveawayDetails.ParticipantCount);
             return;
         }
 
@@ -87,13 +87,12 @@ while (true)
                 return;
             case true when giveawayDetails.Status != "ended":
             {
-                Log.Information($"Joining giveaway {giveawayDetails.Id}.");
+                Log.Information("Joining giveaway {GiveawayDetailsId}", giveawayDetails.Id);
                 await keyDropService.JoinGiveawayAsync(giveawayDetails.Id);
                 return;
             }
             default:
-                Log.Warning(
-                    $"Giveaway {giveawayDetails.Id} is not joinable. Giveaway Status: {giveawayDetails.Status}.");
+                Log.Warning("Giveaway {GiveawayDetailsId} is not joinable. Giveaway Status: {GiveawayDetailsStatus}", giveawayDetails.Id, giveawayDetails.Status);
                 break;
         }
     });
