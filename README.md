@@ -19,9 +19,8 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd keydrop-giveaway-bot
+  cd keydrop-giveaway-bot/src
 ```
-
 
 Build Project
 ```bash
@@ -31,7 +30,7 @@ Build Project
 Start Project
 
 ```bash
-  dotnet run KeyDropGiveawayBot.exe
+  dotnet run
 ```
 
   
@@ -39,7 +38,7 @@ Start Project
 
 To run this project, you will need to add the following environment variables to your appsettings.json file.
 
-`cookie`: Please set the cookie information from the "request headers" section of the request sent in the network tab of the DevTools panel, after opening the https://key-drop.com/tr/token link in your browser.
+`cookie`: Set the cookie information from the "request headers" section of the request sent in the network tab of the DevTools panel, after opening the https://key-drop.com/tr/token link in your browser.
 
 `userAgent`: Get your user-agent information from https://www.whatsmyua.info/
 
