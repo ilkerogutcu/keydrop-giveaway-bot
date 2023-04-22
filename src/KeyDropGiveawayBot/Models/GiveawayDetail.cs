@@ -1,6 +1,6 @@
 namespace KeyDropGiveawayBot.Models;
 
-public class GiveawayResult
+public class GiveawayDetail
 {
     public string Id { get; set; }
     public string? MySteamId { get; set; }

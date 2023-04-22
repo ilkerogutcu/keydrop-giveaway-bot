@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using KeyDropGiveawayBot.Constants;
+using KeyDropGiveawayBot.Exceptions;
 using KeyDropGiveawayBot.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.ObjectPool;
@@ -39,11 +40,35 @@ public class ApiClient : IApiClient
 
         var httpClientResponse = await httpClient.GetAsync(uri);
 
+        if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
+            throw new ExpiredCookieException();
+
         if (httpClientResponse.StatusCode != HttpStatusCode.OK)
             throw new Exception(
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
 
         var response = await GetResponseAsync<T>(httpClientResponse);
+        return response;
+    }
+
+    public async Task<string> GetResponseContentAsStringAsync(string url,
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null)
+    {
+        var uri = GetUri(url, GetQueryString(queryParameters));
+        var httpClient = GetHttpClient();
+        httpClient.BaseAddress = new Uri(uri);
+        AddHeaders(httpClient);
+
+        var httpClientResponse = await httpClient.GetAsync(uri);
+        var response = await httpClientResponse.Content.ReadAsStringAsync();
+
+        if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
+            throw new ExpiredCookieException();
+
+        if (httpClientResponse.StatusCode != HttpStatusCode.OK)
+            throw new Exception(
+                $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
+
         return response;
     }
 
@@ -58,6 +83,9 @@ public class ApiClient : IApiClient
         var httpClientResponse =
             await httpClient.PostAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)));
 
+        if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
+            throw new ExpiredCookieException();
+
         if (httpClientResponse.StatusCode != HttpStatusCode.OK)
             throw new Exception(
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
@@ -66,7 +94,7 @@ public class ApiClient : IApiClient
         return response;
     }
 
-    public async Task<TOut> PutAsync<TIn, TOut>(string url, TIn payload,
+    public async Task<TOut> PutAsync<TIn, TOut>(string url, TIn? payload,
         IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null) where TIn : class where TOut : class
     {
         var uri = GetUri(url, GetQueryString(queryParameters));
@@ -74,8 +102,20 @@ public class ApiClient : IApiClient
         httpClient.BaseAddress = new Uri(uri);
         AddHeaders(httpClient);
 
-        var httpClientResponse =
-            await httpClient.PutAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)));
+        HttpResponseMessage httpClientResponse;
+
+        if (payload is null)
+        {
+            httpClientResponse = await httpClient.PutAsync(uri, null);
+        }
+        else
+        {
+            httpClientResponse =
+                await httpClient.PutAsync(uri, new StringContent(JsonConvert.SerializeObject(payload)));
+        }
+
+        if (httpClientResponse.StatusCode == HttpStatusCode.Forbidden)
+            throw new ExpiredCookieException();
 
         if (httpClientResponse.StatusCode != HttpStatusCode.OK)
             throw new Exception(
@@ -95,7 +135,7 @@ public class ApiClient : IApiClient
         return response;
     }
 
-    private string GetUri(string url, string? queryParameter)
+    private static string GetUri(string url, string? queryParameter)
     {
         var queryParameterIsEmpty = string.IsNullOrEmpty(queryParameter);
         var startsWithQuestionMark = queryParameter?.StartsWith(ApiClientConstants.QuestionMark) ?? false;
@@ -113,7 +153,7 @@ public class ApiClient : IApiClient
         return httpClient;
     }
 
-    private string GetQueryString(IReadOnlyList<KeyValuePair<string, object>>? queryParameters)
+    private string GetQueryString(IReadOnlyCollection<KeyValuePair<string, object>>? queryParameters)
     {
         if (queryParameters == null || queryParameters.Count == 0)
             return string.Empty;

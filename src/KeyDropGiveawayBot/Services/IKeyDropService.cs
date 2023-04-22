@@ -4,6 +4,7 @@ namespace KeyDropGiveawayBot.Services;
 
 public interface IKeyDropService
 {
-    Task<List<Giveaway>> GetGiveawaysAsync();
-    Task<GiveawayResult?> GetGiveawayResultByIdAsync(string giveawayId);
+    Task<List<Giveaway>?> GetGiveawaysAsync();
+    Task<GiveawayDetail?> GetGiveawayDetailsByIdAsync(string giveawayId);
+    Task<JoinGiveawayResponse?> JoinGiveawayAsync(string giveawayId);
 }
