@@ -50,3 +50,11 @@ To run this project, you will need to add the following environment variables to
 
   
 ![screenshot2](https://github.com/ilkerogutcu/keydrop-giveaway-bot/blob/master/images/Screenshot_2.png)
+
+## Contributing
+
+Thank you for your interest in contributing to this project! Contributions are welcome and appreciated.
+
+If you have any questions or suggestions, please feel free to open an issue or submit a pull request. I will review your contributions as soon as possible.
+
+Together, we can make this project better!
