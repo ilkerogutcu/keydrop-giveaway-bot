@@ -68,7 +68,7 @@ public class KeyDropService : IKeyDropService
         }
     }
 
-    public async Task<GiveawayDetail?> GetGiveawayDetailsByIdAsync(string giveawayId)
+    public async Task<GiveawayDetails?> GetGiveawayDetailsByIdAsync(string giveawayId)
     {
         try
         {
@@ -103,7 +103,7 @@ public class KeyDropService : IKeyDropService
             headers.Add("cookie", _configuration["Cookie"]);
 
 
-            var response = await _apiClient.AddHeaders(headers).GetAsync<BaseKeyDropResponse<GiveawayDetail>>(
+            var response = await _apiClient.AddHeaders(headers).GetAsync<BaseKeyDropResponse<GiveawayDetails>>(
                 string.Format(KeyDropEndpoints.GetGiveawayResultEndpoint, giveawayId));
             return response.Data;
         }
