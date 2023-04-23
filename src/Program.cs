@@ -66,36 +66,43 @@ while (true)
         continue;
     }
 
-    Parallel.ForEach(giveaways, async giveaway =>
+    giveaways.Reverse();
+    foreach (var giveaway in giveaways)
     {
         var giveawayDetails = await keyDropService.GetGiveawayDetailsByIdAsync(giveaway.Id);
         if (giveawayDetails is null)
         {
             Log.Warning("An error occurred while getting giveaway details");
-            return;
+            continue;
         }
 
         if (giveawayDetails.HaveIJoined == true)
         {
-            Log.Information("Already joined giveaway {GiveawayDetailsId}. Currently in {GiveawayDetailsParticipantCount} users", giveawayDetails.Id, giveawayDetails.ParticipantCount);
-            return;
+            Log.Information(
+                "Already joined giveaway {GiveawayDetailsId}. Currently in {GiveawayDetailsParticipantCount} users",
+                giveawayDetails.Id, giveawayDetails.ParticipantCount);
+            continue;
         }
 
         switch (giveawayDetails.CanIJoin)
         {
             case false when giveawayDetails.Status != "ended":
-                return;
+                break;
             case true when giveawayDetails.Status != "ended":
             {
                 Log.Information("Joining giveaway {GiveawayDetailsId}", giveawayDetails.Id);
                 await keyDropService.JoinGiveawayAsync(giveawayDetails.Id);
-                return;
+                break;
             }
             default:
-                Log.Warning("Giveaway {GiveawayDetailsId} is not joinable. Giveaway Status: {GiveawayDetailsStatus}", giveawayDetails.Id, giveawayDetails.Status);
+                Log.Warning("Giveaway {GiveawayDetailsId} is not joinable. Giveaway Status: {GiveawayDetailsStatus}",
+                    giveawayDetails.Id, giveawayDetails.Status);
                 break;
         }
-    });
+
+        await Task.Delay(1000);
+    }
+
     await Task.Delay(10000);
 }
 
