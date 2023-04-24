@@ -7,7 +7,7 @@ public class GiveawayDetails
     public int? MaxUsers { get; set; }
     public int? MinUsers { get; set; }
     public int? DepositAmountRequired { get; set; }
-    public int? DepositAmountMissing { get; set; }
+    public double? DepositAmountMissing { get; set; }
     public string PublicHash { get; set; }
     public long? DeadlineTimestamp { get; set; }
     public string Status { get; set; }
