@@ -1,7 +1,7 @@
 
 # KeyDrop Giveaway Bot
 
-KeyDrop Giveaway Bot is an automatic join bot for the KeyDrop website's request-based giveaways. Its purpose is to joinable users to join these giveaways without having to manually join their details each time. With this bot, users can simply input their desired giveaway and wait for the results. It streamlines the giveaway process and makes it easier for users to participate in these events.
+KeyDrop Giveaway Bot is an request-based automatic join bot for the KeyDrop website's giveaways. Its purpose is to joinable users to join these giveaways without having to manually join their details each time. With this bot, users can simply input their desired giveaway and wait for the results. It streamlines the giveaway process and makes it easier for users to participate in these events.
 
 
 ## Installation 
