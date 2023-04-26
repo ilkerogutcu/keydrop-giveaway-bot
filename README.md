@@ -37,15 +37,10 @@ Start Project
 
 To run this project, you will need to add the following environment variables to your appsettings.json file.
 
-`cookie`: Set the cookie information from the "request headers" section of the request sent in the network tab of the DevTools panel, after opening the https://key-drop.com/tr/token link in your browser.
+`sessionId`: While on the KeyDrop website, open the DevTools on your browser and navigate to the Application tab. Under the Storage section, expand the Cookies dropdown and find the "session_id". Replace the default value with the name of your "session_id" value.
 
 `userAgent`: Get your user-agent information from https://www.whatsmyua.info/
 
-
-  
-## Tutorial 
-
-[Tutorial video](https://streamable.com/ymq8c0) for how to run bot.
 
 ## Screenshots
 
