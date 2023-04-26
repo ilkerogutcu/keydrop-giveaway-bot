@@ -11,11 +11,13 @@ public class KeyDropService : IKeyDropService
 {
     private readonly IApiClient _apiClient;
     private readonly IConfiguration _configuration;
+    private readonly ISessionService _sessionService;
 
-    public KeyDropService(IApiClient apiClient, IConfiguration configuration)
+    public KeyDropService(IApiClient apiClient, IConfiguration configuration, ISessionService sessionService)
     {
         _apiClient = apiClient;
         _configuration = configuration;
+        _sessionService = sessionService;
     }
 
     public async Task<List<Giveaway>?> GetGiveawaysAsync()
@@ -32,7 +34,7 @@ public class KeyDropService : IKeyDropService
             return null;
         }
 
-        IReadOnlyDictionary<string, string> headers = new Dictionary<string, string>
+        var headers = new Dictionary<string, string>
         {
             { "authority", "wss-2061.key-drop.com" },
             {
@@ -51,17 +53,19 @@ public class KeyDropService : IKeyDropService
             { "sec-fetch-user", "?1" },
             { "upgrade-insecure-requests", "1" },
             { "user-agent", _configuration["userAgent"] },
-            { "Cookie", _configuration["cookie"] }
+            { "cookie", _configuration["cookie"] }
         };
         try
         {
             var response = await _apiClient.AddHeaders(headers)
-                .GetAsync<PaginatedKeyDropResponse<Giveaway>>(KeyDropEndpoints.GetGiveawayListEndpoint);
+                .GetAsync<PaginatedKeyDropResponse<Giveaway>>(KeyDropConstants.GetGiveawayListEndpoint);
             return response.Data;
         }
         catch (ExpiredCookieException e)
         {
             Log.Error(e.Message);
+            await _sessionService.SetKeyDropCookieAsync();
+            Log.Information("Cookie has been refreshed. Trying again to get giveaways");
             return null;
         }
         catch (TaskCanceledException)
@@ -90,7 +94,7 @@ public class KeyDropService : IKeyDropService
             return null;
         }
 
-        IReadOnlyDictionary<string, string> headers = new Dictionary<string, string>
+        var headers = new Dictionary<string, string>
         {
             { "authority", "wss-2061.key-drop.com" },
             { "accept", "*/*" },
@@ -105,19 +109,21 @@ public class KeyDropService : IKeyDropService
             { "sec-fetch-mode", "cors" },
             { "sec-fetch-site", "same-site" },
             { "user-agent", _configuration["userAgent"] },
+            { "cookie", _configuration["cookie"] },
             { "x-currency", "USD" },
-            { "cookie", _configuration["cookie"] }
         };
 
         try
         {
             var response = await _apiClient.AddHeaders(headers).GetAsync<BaseKeyDropResponse<GiveawayDetails>>(
-                string.Format(KeyDropEndpoints.GetGiveawayResultEndpoint, giveawayId));
+                string.Format(KeyDropConstants.GetGiveawayResultEndpoint, giveawayId));
             return response.Data;
         }
         catch (ExpiredCookieException e)
         {
             Log.Error(e.Message);
+            await _sessionService.SetKeyDropCookieAsync();
+            Log.Information("Cookie has been refreshed. Trying again to get giveaway result");
             return null;
         }
         catch (TaskCanceledException)
@@ -134,6 +140,8 @@ public class KeyDropService : IKeyDropService
 
     public async Task<JoinGiveawayResponse?> JoinGiveawayAsync(string giveawayId)
     {
+        Log.Information("Joining giveaway {GiveawayDetailsId}", giveawayId);
+
         var configurationIsNullOrEmpty = KeyDropConfigurationIsNullOrEmpty();
         if (configurationIsNullOrEmpty)
         {
@@ -146,7 +154,7 @@ public class KeyDropService : IKeyDropService
             return null;
         }
 
-        IReadOnlyDictionary<string, string> headers = new Dictionary<string, string>
+        var headers = new Dictionary<string, string>
         {
             { "authority", "wss-3002.key-drop.com" },
             { "accept", "*/*" },
@@ -160,17 +168,16 @@ public class KeyDropService : IKeyDropService
             { "sec-fetch-dest", "empty" },
             { "sec-fetch-mode", "cors" },
             { "sec-fetch-site", "same-site" },
+            { "cookie", _configuration["cookie"] },
             { "user-agent", _configuration["userAgent"] },
-            { "cookie", _configuration["cookie"] }
         };
+        var cts = new CancellationTokenSource();
 
         try
         {
-            var cts = new CancellationTokenSource();
-
             var response = await _apiClient.AddHeaders(headers)
                 .PutAsync<object, BaseKeyDropResponse<JoinGiveawayResponse>>(
-                    string.Format(KeyDropEndpoints.JoinGiveawayEndpoint, giveawayId), null,
+                    string.Format(KeyDropConstants.JoinGiveawayEndpoint, giveawayId), null,
                     cancellationToken: cts.Token);
 
             if (!response.Success)
@@ -181,7 +188,8 @@ public class KeyDropService : IKeyDropService
                     return null;
                 }
 
-                Log.Error("An error occurred while joining giveaway {GiveawayId}. Error: {ResponseMessage}", giveawayId, response.Message);
+                Log.Error("An error occurred while joining giveaway {GiveawayId}. Error: {ResponseMessage}", giveawayId,
+                    response.Message);
                 return null;
             }
 
@@ -191,6 +199,8 @@ public class KeyDropService : IKeyDropService
         catch (ExpiredCookieException e)
         {
             Log.Error(e.Message);
+            await _sessionService.SetKeyDropCookieAsync(cts.Token);
+            Log.Information("Cookie has been refreshed. Trying again to join giveaway");
             return null;
         }
         catch (TaskCanceledException)
@@ -213,7 +223,7 @@ public class KeyDropService : IKeyDropService
             return null;
         }
 
-        IReadOnlyDictionary<string, string> headers = new Dictionary<string, string>
+        var headers = new Dictionary<string, string>
         {
             { "authority", "key-drop.com" },
             {
@@ -241,13 +251,15 @@ public class KeyDropService : IKeyDropService
         try
         {
             var response = await _apiClient.AddHeaders(headers)
-                .GetResponseContentAsStringAsync(KeyDropEndpoints.GetTokenEndpoint,
+                .GetResponseContentAsStringAsync(KeyDropConstants.GetTokenEndpoint,
                     cancellationToken: cts.Token);
             return response;
         }
         catch (ExpiredCookieException e)
         {
             Log.Error(e.Message);
+            await _sessionService.SetKeyDropCookieAsync(cts.Token);
+            Log.Information("Cookie has been refreshed. Trying again to get token");
             return null;
         }
         catch (TaskCanceledException e)
@@ -264,15 +276,15 @@ public class KeyDropService : IKeyDropService
 
     private bool KeyDropConfigurationIsNullOrEmpty()
     {
-        if (string.IsNullOrEmpty(_configuration["cookie"]))
+        if (string.IsNullOrEmpty(_configuration["sessionId"]))
         {
-            Log.Error("Cookie is not set in configuration. Please check your configuration file");
+            Log.Error("SessionId is not set in configuration. Please check your configuration file");
             return true;
         }
 
-        if (string.IsNullOrEmpty(_configuration["userAgent"]))
+        if (string.IsNullOrEmpty(_configuration["cookie"]))
         {
-            Log.Error("UserAgent is not set in configuration. Please check your configuration file");
+            Log.Error("Cookie is not set in configuration. Please check your configuration file");
             return true;
         }
 

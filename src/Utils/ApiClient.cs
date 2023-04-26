@@ -3,6 +3,7 @@ using System.Text;
 using KeyDropGiveawayBot.Constants;
 using KeyDropGiveawayBot.Exceptions;
 using KeyDropGiveawayBot.Extensions;
+using KeyDropGiveawayBot.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.ObjectPool;
 using Newtonsoft.Json;
@@ -72,6 +73,32 @@ public class ApiClient : IApiClient
                 $"An error occurred while calling {uri} with status code {httpClientResponse.StatusCode}");
 
         return response;
+    }
+
+    public async Task<HttpResponseMessage> GetHttpResponseAsync<T>(string url, HttpRequestType requestType, T? payload,
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        var uri = GetUri(url, GetQueryString(queryParameters));
+        var httpClient = GetHttpClient();
+        httpClient.BaseAddress = new Uri(uri);
+
+        AddHeaders(httpClient);
+
+        var httpClientResponse = requestType switch
+        {
+            HttpRequestType.Get => await httpClient.GetAsync(uri, cancellationToken),
+            HttpRequestType.Post => await httpClient.PostAsync(uri,
+                new StringContent(JsonConvert.SerializeObject(payload)), cancellationToken),
+            HttpRequestType.Put => await httpClient.PutAsync(uri,
+                new StringContent(JsonConvert.SerializeObject(payload)), cancellationToken),
+            HttpRequestType.Delete => await httpClient.DeleteAsync(uri, cancellationToken),
+            HttpRequestType.Patch => await httpClient.PatchAsync(uri,
+                new StringContent(JsonConvert.SerializeObject(payload)), cancellationToken),
+            _ => throw new ArgumentOutOfRangeException(nameof(requestType), requestType, null)
+        };
+
+        return httpClientResponse;
     }
 
     public async Task<TOut> PostAsync<TIn, TOut>(string url, TIn payload,

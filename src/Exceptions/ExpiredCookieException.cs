@@ -3,7 +3,7 @@
 public class ExpiredCookieException : Exception
 {
     public ExpiredCookieException(
-        string message = "Your cookie has expired. Please update your cookie in the appsettings.json file.") :
+        string message = "Your cookie has expired.") :
         base(message)
     {
     }

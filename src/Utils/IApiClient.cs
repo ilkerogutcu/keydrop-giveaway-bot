@@ -1,3 +1,5 @@
+using KeyDropGiveawayBot.Models;
+
 namespace KeyDropGiveawayBot.Utils;
 
 public interface IApiClient
@@ -9,6 +11,10 @@ public interface IApiClient
         where T : class;
 
     Task<string> GetResponseContentAsStringAsync(string url,
+        IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
+        CancellationToken cancellationToken = default);
+
+    Task<HttpResponseMessage> GetHttpResponseAsync<T>(string url, HttpRequestType requestType, T? payload,
         IReadOnlyList<KeyValuePair<string, object>>? queryParameters = null,
         CancellationToken cancellationToken = default);
 
