@@ -44,7 +44,7 @@ To run this project, you will need to add the following environment variables to
 
 ## Screenshots
 
-![screenshot1](https://github.com/ilkerogutcu/keydrop-giveaway-bot/blob/master/images/Screenshot_1.png)
+![screenshot1](https://github.com/ilkerogutcu/keydrop-giveaway-bot/blob/master/images/Screenshot_4.png)
 
   
 ![screenshot2](https://github.com/ilkerogutcu/keydrop-giveaway-bot/blob/master/images/Screenshot_3.png)
