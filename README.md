@@ -3,7 +3,6 @@
 
 KeyDrop Giveaway Bot is an request-based automatic join bot for the KeyDrop website's giveaways. Its purpose is to joinable users to join these giveaways without having to manually join their details each time. With this bot, users can simply input their desired giveaway and wait for the results. It streamlines the giveaway process and makes it easier for users to participate in these events.
 
-
 ## Installation 
 
 Use [git](https://git-scm.com/downloads) to download source code.
@@ -44,6 +43,10 @@ To run this project, you will need to add the following environment variables to
 
 
   
+## Tutorial 
+
+[Tutorial video](https://streamable.com/ymq8c0) for how to run bot.
+
 ## Screenshots
 
 ![screenshot1](https://github.com/ilkerogutcu/keydrop-giveaway-bot/blob/master/images/Screenshot_1.png)
