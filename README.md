@@ -41,6 +41,27 @@ To run this project, you will need to add the following environment variables to
 
 `userAgent`: Get your user-agent information from https://www.whatsmyua.info/
 
+## Docker
+
+You can containerize this project with Docker. It allows you to run it somewhere on your server without the need have it running on your personal machine.
+
+### Configuration
+
+The container runs under Linux operating system, thus, to be able to bypass CloudFlare protection you also need a Linux browser `User Agent`.
+
+To get this, grab the value of `Latest Chrome on Linux User Agents` from [this website](https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome), e.g.
+
+```
+Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+```
+
+### Usage
+
+```
+docker build -t keydrop-giveaway-bot:latest .
+docker run -it keydrop-giveaway-bot -e sessionId="your_session_id" -e userAgent="user_agent_from_previous_section"
+```
+
 
 ## Screenshots
 

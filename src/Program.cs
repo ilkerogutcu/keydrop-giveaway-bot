@@ -46,7 +46,7 @@ using var host = Host.CreateDefaultBuilder()
             return provider.Create(new StringBuilderPooledObjectPolicy());
         });
     })
-    .ConfigureAppConfiguration((context, config) => { config.AddJsonFile("appsettings.json", false, true); })
+    .ConfigureAppConfiguration((context, config) => { config.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables(); })
     .Build();
 
 #endregion
